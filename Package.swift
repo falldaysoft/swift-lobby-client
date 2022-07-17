@@ -8,8 +8,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "swift-lobby-client",
-            targets: ["swift-lobby-client"]),
+            name: "SwiftLobbyClient",
+            targets: ["SwiftLobbyClient"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,8 +21,5 @@ let package = Package(
         .target(
             name: "SwiftLobbyClient",
             dependencies: []),
-        .testTarget(
-            name: "swift-lobby-clientTests",
-            dependencies: ["swift-lobby-client"]),
     ]
 )
