@@ -11,7 +11,7 @@ import Foundation
  Messages that clients can send to the server.  The first
  connected client "owns" the lobby.
  */
-enum IncomingPlayerMessage: Codable, Equatable {
+public enum IncomingPlayerMessage: Codable, Equatable {
     /// Client Ping
     case ping
     /// Message from the user to show to all users
@@ -48,7 +48,7 @@ enum IncomingPlayerMessage: Codable, Equatable {
 
 // Sent in the "hello" message to let the client know about
 // all the current players.
-struct OutgoingPlayerInfo: Codable, Equatable {
+public struct OutgoingPlayerInfo: Codable, Equatable {
     var name: String
     var playerNum: Int
     var properties: [String: String]
@@ -57,7 +57,7 @@ struct OutgoingPlayerInfo: Codable, Equatable {
 /**
  Messages that the server can send to clients.
  */
-enum OutgoingPlayerMessage: Codable, Equatable {
+public enum OutgoingPlayerMessage: Codable, Equatable {
     /// Send a message to all clients, payload is up to the client.
     case broadcast(data: [String:String])
     /// Message to just this player

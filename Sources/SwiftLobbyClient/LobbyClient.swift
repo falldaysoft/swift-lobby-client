@@ -6,11 +6,11 @@
 
 import Foundation
 
-class LobbyClient: NSObject, URLSessionWebSocketDelegate {
+public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
     var webSocketTask: URLSessionWebSocketTask?
     var url: URL
     
-    init(server: URL, lobbyCode: String? = nil) {
+    public init(server: URL, lobbyCode: String? = nil) {
         
         var url = server.appendingPathComponent("ws")
         if let lobbyCode = lobbyCode {
@@ -24,22 +24,22 @@ class LobbyClient: NSObject, URLSessionWebSocketDelegate {
         connect()
     }
     
-    func connect() {
+    public func connect() {
         let session = URLSession(configuration: .default, delegate: self, delegateQueue: OperationQueue())
         let webSocketTask = session.webSocketTask(with: url)
         webSocketTask.resume()
     }
     
     // MARK: WebSocket Delegate
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("Web Socket did connect")
     }
     
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("Web Socket did disconnect")
     }
 
-    func send(_ message: IncomingPlayerMessage) async {
+    public func send(_ message: IncomingPlayerMessage) async {
         let data = try! JSONEncoder().encode(message)
         let str = String(data: data, encoding: .utf8)
         print("Sending \(String(describing: str))")
