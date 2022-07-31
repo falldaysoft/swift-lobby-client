@@ -36,6 +36,7 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
     
     var url: URL
     var delegate: LobbyClientDelegate
+    var shouldReconnect = true
     
     public var players = [PlayerInfo]()
     public var ourPlayerNum: Int?
@@ -80,6 +81,9 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
                 case .string(let string):
                     if let data = string.data(using: .utf8),
                         let message = try? decoder.decode(OutgoingPlayerMessage.self, from: data) {
+                        if case .lobbyNotFound = message {
+                            self.shouldReconnect = false
+                        }
                         DispatchQueue.main.async {
                             self.processMessage(message)
                             self.delegate.lobbyDidReceiveMessage(lobbyClient: self, message: message)
@@ -89,7 +93,17 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
                     fatalError()
                 }
             }
-            self.receiveMessage()
+            
+            switch self.connectionStatus {
+            case .connected:
+                fallthrough
+            case .connecting:
+                fallthrough
+            case .reconnecting:
+                self.receiveMessage()
+            default:
+                print("Not listening, not connected")
+            }
         }
     }
     
