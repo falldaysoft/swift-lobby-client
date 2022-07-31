@@ -13,4 +13,13 @@ learning tool, and maybe a starting point.
 
 There are clients for multiple languages; this is the Swift client.
 
-It's currently incomplete.
+# State
+
+Each lobby has some state that's shared when the user first joins
+(via the `.hello` message) and then updated with messages like
+`.setPlayerProperties` and `.addToList`.
+
+`LobbyClient` tracks the state for you, so you can look at the 
+`players`, `lobbyProperties` and `lists` properties without having
+to process the messages to update them.
+

@@ -32,9 +32,16 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
         }
     }
     
-    var webSocketTask: URLSessionWebSocketTask?
+    private var webSocketTask: URLSessionWebSocketTask?
+    
     var url: URL
     var delegate: LobbyClientDelegate
+    
+    public var players = [PlayerInfo]()
+    public var ourPlayerNum: Int?
+    public var lobbyCode: String?
+    public var lobbyProperties = [String : String]()
+    public var lists = [String : [[String : String]]]()
     
     public init(server: URL, lobbyCode: String? = nil, delegate: LobbyClientDelegate) {
         var url = server.appendingPathComponent("ws")
@@ -74,6 +81,7 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
                     if let data = string.data(using: .utf8),
                         let message = try? decoder.decode(OutgoingPlayerMessage.self, from: data) {
                         DispatchQueue.main.async {
+                            self.processMessage(message)
                             self.delegate.lobbyDidReceiveMessage(lobbyClient: self, message: message)
                         }
                     }
@@ -82,6 +90,58 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
                 }
             }
             self.receiveMessage()
+        }
+    }
+    
+    /**
+     Update lobby state if required for this message.
+     */
+    private func processMessage(_ message: OutgoingPlayerMessage) {
+        // Keeping the empty cases (not using `default`) so the switch has to be
+        // exhaustive, we don't want to miss any new properties.
+        switch message {
+        case .hello(let lobbyCode, let playerNum, let players, let lobbyProperties, let lists):
+            self.lobbyCode = lobbyCode
+            self.ourPlayerNum = playerNum
+            self.players = players
+            self.lobbyProperties = lobbyProperties
+            self.lists = lists
+        case .playerPropertiesUpdated(let playerNum, let properties):
+            if let playerIndex = self.players.firstIndex(where: { $0.playerNum == playerNum }) {
+                self.players[playerIndex].properties = properties
+            }
+        case .addToList(let name, let value):
+            lists[name]?.append(value)
+        case .playerChangedName(let playerNum, let newName):
+            if let playerIndex = self.players.firstIndex(where: { $0.playerNum == playerNum }) {
+                self.players[playerIndex].name = newName
+            }
+        case .playerDeparted(let playerNum):
+            self.players = self.players.filter { $0.playerNum != playerNum}
+        case .resetList(let listName):
+            lists[listName] = [[String:String]]()
+        case .broadcast(data: _):
+            break
+        case .directSay(text: _, date: _, fromPlayerNum: _):
+            break
+        case .error(message: _):
+            break
+        case .lobbyNotFound:
+            break
+        case .playerJoined(player: let player):
+            self.players.append(player)
+        case .lobbyPropertiesUpdated(properties: let properties):
+            var props = self.lobbyProperties
+            for (key, value) in properties {
+                props[key] = value
+            }
+            self.lobbyProperties = props
+        case .lobbyOwnerChanged(playerNum: _):
+            break
+        case .pong:
+            break
+        case .say(text: _, date: _, fromPlayerNum: _):
+            break
         }
     }
     
@@ -98,7 +158,6 @@ public class LobbyClient: NSObject, URLSessionWebSocketDelegate {
             self.delegate.lobbyDidDisconnect(lobbyClient: self)
         }
     }
-
     
     public func send(_ message: IncomingPlayerMessage) async {
         do {

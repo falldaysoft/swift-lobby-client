@@ -48,10 +48,10 @@ public enum IncomingPlayerMessage: Codable, Equatable {
 
 // Sent in the "hello" message to let the client know about
 // all the current players.
-public struct OutgoingPlayerInfo: Codable, Equatable {
-    var name: String
-    var playerNum: Int
-    var properties: [String: String]
+public struct PlayerInfo: Codable, Equatable {
+    public var name: String
+    public var playerNum: Int
+    public var properties: [String: String]
 }
 
 /**
@@ -65,11 +65,11 @@ public enum OutgoingPlayerMessage: Codable, Equatable {
     // Unexpected error
     case error(message: String)
     /// Every connected player will get this message first
-    case hello(lobbyCode: String, playerNum: Int, players: [OutgoingPlayerInfo], lobbyProperties: [String:String], lists: [String:[[String:String]]])
+    case hello(lobbyCode: String, playerNum: Int, players: [PlayerInfo], lobbyProperties: [String:String], lists: [String:[[String:String]]])
     /// If the player tried to connect to a nonexistent lobby, this is returned and the connection is closed
     case lobbyNotFound
     /// A player has joined.
-    case playerJoined(playerNum: Int, name: String, properties: [String:String])
+    case playerJoined(player: PlayerInfo)
     /// A player has changed their display name.
     case playerChangedName(playerNum: Int, newName: String)
     /// This player is no longer connected.
